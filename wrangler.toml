@@ -1,3 +1,6 @@
 name = "webhook"
+type = "javascript"
+
 main = "index.js"
-compatibility_date = "2024-07-01"
+
+compatibility_date = "2024-07-19"

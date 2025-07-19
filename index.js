@@ -5,7 +5,6 @@ export default {
     const { method } = request;
     const { pathname } = new URL(request.url);
 
-    // Header CORS untuk semua response
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -45,6 +44,10 @@ export default {
           ...corsHeaders,
         },
       });
+    }
+
+    if (method === 'GET' && pathname === '/') {
+      return Response.redirect("https://prastowoardi.github.io", 302);
     }
 
     return new Response("Not Found", {
