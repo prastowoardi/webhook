@@ -8,11 +8,24 @@
     background-color: #1e1e1e;
     color: #f1f1f1;
     font-family: sans-serif;
-    margin: 20px;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    position: relative;
   }
 
   h1 {
     margin-bottom: 20px;
+    text-align: center;
+  }
+
+  #log-container {
+    width: 100%;
+    max-width: 800px;
+    padding: 10px;
   }
 
   details {
@@ -51,10 +64,27 @@
   summary::-webkit-details-marker {
     display: none;
   }
-</style>
 
+  #delete-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  #delete-button:hover {
+    background-color: #b71c1c;
+  }
+  </style>
 </head>
 <body>
+  <button id="delete-button" onclick="deleteLogs()">🗑️ Delete All</button>
   <h1>Webhook Logs</h1>
   <div id="log-container">Loading...</div>
   <script src="main.js"></script>

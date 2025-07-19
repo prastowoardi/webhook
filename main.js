@@ -4,6 +4,11 @@ function loadLogs() {
     .then(data => {
       const container = document.getElementById("log-container");
 
+      if (!data || data.length === 0) {
+        container.innerHTML = "<p style='text-align:center; color:#888;'>No log data!</p>";
+        return;
+      }
+
       const openMap = {};
       Array.from(container.children).forEach(child => {
         const summary = child.querySelector("summary");
@@ -14,7 +19,7 @@ function loadLogs() {
 
       container.innerHTML = "";
 
-      [...data].reverse().forEach((log) => {
+      [...data].reverse().forEach((log, i) => {
         if (!log.method || log.method === "UNKNOWN") return;
 
         const details = document.createElement("details");
@@ -26,6 +31,19 @@ function loadLogs() {
 
         const summaryText = `${log.method} - ${localTime} - ${log.ip}`;
         summary.textContent = summaryText;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "🗑️";
+        deleteBtn.style.marginLeft = "10px";
+        deleteBtn.style.cursor = "pointer";
+        deleteBtn.style.background = "none";
+        deleteBtn.style.border = "none";
+        deleteBtn.style.color = "#f44336";
+        deleteBtn.style.fontSize = "14px";
+        deleteBtn.style.float = "right";
+        deleteBtn.onclick = () => deleteSingleLog(data.length - 1 - i);
+
+        summary.appendChild(deleteBtn);
         details.appendChild(summary);
 
         const jsonText = JSON.stringify(log.body, null, 2);
@@ -79,6 +97,50 @@ function copyButton(textToCopy) {
   });
 
   return button;
+}
+
+function deleteSingleLog(index) {
+  if (!confirm("Yakin Hapus Log?")) return;
+
+  fetch("https://webhook.prastowoardi616.workers.dev/delete", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ index })
+  })
+    .then(res => {
+      if (res.ok) {
+        alert("Log berhasil dihapus.");
+        loadLogs();
+      } else {
+        alert("Gagal menghapus log.");
+      }
+    })
+    .catch(err => {
+      alert("Terjadi kesalahan saat menghapus.");
+      console.error(err);
+    });
+}
+
+function deleteLogs() {
+  if (!confirm("Yakin ingin menghapus semua log?")) return;
+
+  fetch("https://webhook.prastowoardi616.workers.dev/logs", {
+    method: "DELETE"
+  })
+  .then(res => {
+    if (res.ok) {
+      alert("Semua log berhasil dihapus.");
+      loadLogs();  // refresh tampilan setelah hapus
+    } else {
+      alert("Gagal menghapus log.");
+    }
+  })
+  .catch(err => {
+    alert("Terjadi kesalahan saat menghapus log.");
+    console.error(err);
+  });
 }
 
 loadLogs();

@@ -5,7 +5,7 @@ export default {
 
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS ',
       'Access-Control-Allow-Headers': 'Content-Type',
     };
 
@@ -66,6 +66,82 @@ export default {
 
     if (method === 'GET' && pathname === '/') {
       return Response.redirect('https://prastowoardi.github.io', 302);
+    }
+
+    if (method === 'DELETE' && pathname.startsWith('/logs/')) {
+      const indexStr = pathname.split('/')[2];
+      const index = parseInt(indexStr, 10);
+
+      if (isNaN(index)) {
+        return new Response("Invalid index", { status: 400 });
+      }
+
+      const logsText = await env.LOGS.get("webhook_logs");
+      if (!logsText) {
+        return new Response("No logs", { status: 404 });
+      }
+
+      let logs = [];
+      try {
+        logs = JSON.parse(logsText);
+      } catch {
+        return new Response("Corrupt log data", { status: 500 });
+      }
+
+      if (index < 0 || index >= logs.length) {
+        return new Response("Index out of range", { status: 404 });
+      }
+
+      logs.splice(index, 1);
+
+      await env.LOGS.put("webhook_logs", JSON.stringify(logs));
+
+      return new Response("Log deleted", {
+        status: 200,
+        headers: corsHeaders,
+      });
+    }
+
+    if (method === 'DELETE' && pathname === '/logs') {
+      await env.LOGS.put("webhook_logs", JSON.stringify([]));
+      return new Response("All logs deleted", {
+        status: 200,
+        headers: corsHeaders,
+      });
+    }
+
+    if (method === 'POST' && pathname === '/delete') {
+      let { index } = await request.json();
+      index = parseInt(index, 10);
+
+      if (isNaN(index)) {
+        return new Response("Invalid index", { status: 400, headers: corsHeaders });
+      }
+
+      const logsText = await env.LOGS.get("webhook_logs");
+      if (!logsText) {
+        return new Response("No logs", { status: 404, headers: corsHeaders });
+      }
+
+      let logs = [];
+      try {
+        logs = JSON.parse(logsText);
+      } catch {
+        return new Response("Corrupt log data", { status: 500, headers: corsHeaders });
+      }
+
+      if (index < 0 || index >= logs.length) {
+        return new Response("Index out of range", { status: 404, headers: corsHeaders });
+      }
+
+      logs.splice(index, 1);
+
+      await env.LOGS.put("webhook_logs", JSON.stringify(logs));
+
+      return new Response("Log deleted", {
+        status: 200,
+        headers: corsHeaders,
+      });
     }
 
     return new Response('Not Found', {
