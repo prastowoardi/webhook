@@ -36,7 +36,7 @@ function loadLogs() {
           details.open = true;
         }
 
-        container.appendChild(details);
+        container.prepend(details);
       });
     })
     .catch(err => {
