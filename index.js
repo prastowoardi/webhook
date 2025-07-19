@@ -22,6 +22,7 @@ export default {
       const log = {
         timestamp: new Date().toISOString(),
         ip: request.headers.get("CF-Connecting-IP") || "unknown",
+        method: request.method,
         body,
       };
 
