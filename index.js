@@ -19,7 +19,16 @@ export default {
     }
 
     if (method === 'POST' && pathname === '/webhook') {
-      const body = await request.json();
+      let body;
+      try {
+        body = await request.json();
+      } catch (err) {
+        return new Response("Invalid JSON", {
+          status: 400,
+          headers: corsHeaders,
+        });
+      }
+
       const log = {
         timestamp: new Date().toISOString(),
         ip: request.headers.get("CF-Connecting-IP") || "unknown",
@@ -27,9 +36,9 @@ export default {
       };
 
       logs.push(log);
-      if (logs.length > 50) logs.shift();
+      if (logs.length > 50) logs.shift(); // keep last 50 logs only
 
-      console.log("📩 Webhook:", JSON.stringify(log, null, 2));
+      console.log("📩 Webhook received:", JSON.stringify(log, null, 2));
       return new Response("OK", {
         status: 200,
         headers: corsHeaders,
@@ -47,10 +56,10 @@ export default {
     }
 
     if (method === 'GET' && pathname === '/') {
-      return Response.redirect("https://prastowoardi.github.io", 302);
+      return Response.redirect('https://prastowoardi.github.io', 302);
     }
 
-    return new Response("Not Found", {
+    return new Response('Not Found', {
       status: 404,
       headers: corsHeaders,
     });
