@@ -19,16 +19,7 @@ export default {
     }
 
     if (method === 'POST' && pathname === '/webhook') {
-      let body;
-      try {
-        body = await request.json();
-      } catch (err) {
-        return new Response("Invalid JSON", {
-          status: 400,
-          headers: corsHeaders,
-        });
-      }
-
+      const body = await request.json();
       const log = {
         timestamp: new Date().toISOString(),
         ip: request.headers.get("CF-Connecting-IP") || "unknown",
@@ -36,9 +27,10 @@ export default {
       };
 
       logs.push(log);
-      if (logs.length > 50) logs.shift(); // keep last 50 logs only
+      if (logs.length > 50) logs.shift();
 
-      console.log("📩 Webhook received:", JSON.stringify(log, null, 2));
+      console.log("Webhook received", log);
+
       return new Response("OK", {
         status: 200,
         headers: corsHeaders,

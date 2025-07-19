@@ -4,3 +4,7 @@ type = "javascript"
 main = "index.js"
 
 compatibility_date = "2024-07-19"
+
+[[kv_namespaces]]
+binding = "LOGS"
+id = "4c6b56f468eb4795b9e16789065a0baf"
