@@ -4,10 +4,15 @@ fetch("https://webhook.prastowoardi616.workers.dev/logs")
     const container = document.getElementById("log-container");
     container.innerHTML = "";
 
+    if (!data.length) {
+      container.innerHTML = "<p>No logs yet.</p>";
+      return;
+    }
+
     data.reverse().forEach((log, i) => {
       const details = document.createElement("details");
       const summary = document.createElement("summary");
-      summary.textContent = `${i + 1}. ${log.timestamp}`;
+      summary.textContent = `${i + 1}. ${log.timestamp} — ${log.ip}`;
       details.appendChild(summary);
 
       const pre = document.createElement("pre");
