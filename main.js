@@ -1,4 +1,3 @@
-function loadLogs() {
   fetch("https://webhook.prastowoardi616.workers.dev/logs")
   .then(res => res.json())
   .then(data => {
@@ -26,8 +25,4 @@ function loadLogs() {
     document.getElementById("log-container").innerText = "Error loading logs.";
     console.error(err);
   });
-}
 
-loadLogs();
-
-// setInterval(loadLogs, 5000);
