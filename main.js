@@ -20,9 +20,8 @@ function loadLogs() {
         const summary = document.createElement("summary");
 
         const logNumber = data.length - i;
-        const summaryText = `${i + 1}. ${log.timestamp} - ${log.ip}`;
-        
-        summary.textContent = `${logNumber}. ${log.timestamp} - ${log.ip}`;
+        const summaryText = `${logNumber}. ${log.timestamp} - ${log.ip}`;
+        summary.textContent = summaryText;
         details.appendChild(summary);
 
         const pre = document.createElement("pre");
@@ -35,6 +34,7 @@ function loadLogs() {
 
         container.appendChild(details);
       });
+
     })
     .catch(err => {
       document.getElementById("log-container").innerText = "Error loading logs.";
