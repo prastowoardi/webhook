@@ -17,9 +17,12 @@ function loadLogs() {
 
       [...data].reverse().forEach((log, i) => {
         const details = document.createElement("details");
-        const summaryText = `${i + 1}. ${log.timestamp} - ${log.ip}`;
         const summary = document.createElement("summary");
-        summary.textContent = summaryText;
+
+        const logNumber = data.length - i;
+        const summaryText = `${i + 1}. ${log.timestamp} - ${log.ip}`;
+        
+        summary.textContent = `${logNumber}. ${log.timestamp} - ${log.ip}`;
         details.appendChild(summary);
 
         const pre = document.createElement("pre");
