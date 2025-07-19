@@ -14,7 +14,7 @@ function loadLogs() {
 
       container.innerHTML = "";
 
-      [...data].reverse().forEach((log, i) => {
+      [...data].reverse().forEach((log) => {
         if (!log.method || log.method === "UNKNOWN") return;
 
         const details = document.createElement("details");
@@ -28,8 +28,18 @@ function loadLogs() {
         summary.textContent = summaryText;
         details.appendChild(summary);
 
+        const jsonText = JSON.stringify(log.body, null, 2);
+
+        const copyBtn = copyButton(jsonText);
+        details.appendChild(copyBtn);
+
+        const linkedText = jsonText.replace(
+          /(https?:\/\/[^\s"]+)/g,
+          '<a href="$1" target="_blank" style="color:#4FC3F7;">$1</a>'
+        );
+
         const pre = document.createElement("pre");
-        pre.textContent = JSON.stringify(log.body, null, 2);
+        pre.innerHTML = linkedText;
         details.appendChild(pre);
 
         if (openMap[summaryText]) {
@@ -43,6 +53,32 @@ function loadLogs() {
       document.getElementById("log-container").innerText = "Error loading logs.";
       console.error(err);
     });
+}
+
+function copyButton(textToCopy) {
+  const button = document.createElement("button");
+  button.textContent = "📋 Copy";
+  button.style.margin = "10px 0";
+  button.style.cursor = "pointer";
+  button.style.backgroundColor = "#444";
+  button.style.color = "#fff";
+  button.style.border = "none";
+  button.style.padding = "5px 10px";
+  button.style.borderRadius = "4px";
+  button.style.fontSize = "12px";
+
+  button.addEventListener("click", () => {
+    navigator.clipboard.writeText(textToCopy)
+      .then(() => {
+        button.textContent = "✅ Copied!";
+        setTimeout(() => (button.textContent = "📋 Copy"), 1500);
+      })
+      .catch(() => {
+        button.textContent = "❌ Failed";
+      });
+  });
+
+  return button;
 }
 
 loadLogs();
