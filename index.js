@@ -1,7 +1,5 @@
-let logs = [];
-
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     const { method } = request;
     const { pathname } = new URL(request.url);
 
@@ -26,10 +24,13 @@ export default {
         body,
       };
 
-      logs.push(log);
-      if (logs.length > 50) logs.shift();
+      let currentLogsJSON = await env.LOGS.get("entries");
+      let currentLogs = currentLogsJSON ? JSON.parse(currentLogsJSON) : [];
 
-      console.log("Webhook received", log);
+      currentLogs.push(log);
+      if (currentLogs.length > 50) currentLogs.shift();
+
+      await env.LOGS.put("entries", JSON.stringify(currentLogs));
 
       return new Response("OK", {
         status: 200,
@@ -38,17 +39,14 @@ export default {
     }
 
     if (method === 'GET' && pathname === '/logs') {
-      return new Response(JSON.stringify(logs), {
+      let logs = await env.LOGS.get("entries");
+      return new Response(logs || "[]", {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
           ...corsHeaders,
         },
       });
-    }
-
-    if (method === 'GET' && pathname === '/') {
-      return Response.redirect('https://prastowoardi.github.io', 302);
     }
 
     return new Response('Not Found', {
