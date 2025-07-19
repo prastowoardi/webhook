@@ -13,25 +13,29 @@ function loadLogs() {
       Array.from(container.children).forEach(child => {
         const summary = child.querySelector("summary");
         if (child.tagName === "DETAILS" && child.open && summary) {
-          openMap[summary.textContent] = true;
+          const key = summary.getAttribute("data-key");
+          if (key) openMap[key] = true;
         }
       });
-
+      
       container.innerHTML = "";
-
+      
       [...data].reverse().forEach((log, i) => {
         if (!log.method || log.method === "UNKNOWN") return;
-
+      
         const details = document.createElement("details");
         const summary = document.createElement("summary");
-
+      
         const gmt7 = new Date(log.timestamp);
         gmt7.setHours(gmt7.getHours() + 7);
         const localTime = gmt7.toISOString().replace("T", " ").slice(0, 19);
-
+      
         const summaryText = `${log.method} - ${localTime} - ${log.ip}`;
+        const uniqueKey = `${log.timestamp}_${log.ip}_${log.method}`;
+      
         summary.textContent = summaryText;
-
+        summary.setAttribute("data-key", uniqueKey);
+      
         const deleteBtn = document.createElement("button");
         deleteBtn.textContent = "🗑️";
         deleteBtn.style.marginLeft = "10px";
@@ -42,28 +46,27 @@ function loadLogs() {
         deleteBtn.style.fontSize = "14px";
         deleteBtn.style.float = "right";
         deleteBtn.onclick = () => deleteSingleLog(data.length - 1 - i);
-
         summary.appendChild(deleteBtn);
+      
         details.appendChild(summary);
-
+      
         const jsonText = JSON.stringify(log.body, null, 2);
-
         const copyBtn = copyButton(jsonText);
         details.appendChild(copyBtn);
-
+      
         const linkedText = jsonText.replace(
           /(https?:\/\/[^\s"]+)/g,
           '<a href="$1" target="_blank" style="color:#4FC3F7;">$1</a>'
         );
-
+      
         const pre = document.createElement("pre");
         pre.innerHTML = linkedText;
         details.appendChild(pre);
-
-        if (openMap[summaryText]) {
+      
+        if (openMap[uniqueKey]) {
           details.open = true;
         }
-
+      
         container.prepend(details);
       });
     })
