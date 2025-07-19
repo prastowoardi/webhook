@@ -30,4 +30,4 @@ function loadLogs() {
 
 loadLogs();
 
-setInterval(loadLogs, 5000);
+// setInterval(loadLogs, 5000);
