@@ -18,9 +18,13 @@ function loadLogs() {
       [...data].reverse().forEach((log, i) => {
         const details = document.createElement("details");
         const summary = document.createElement("summary");
-
         const logNumber = data.length - i;
-        const summaryText = `${logNumber}. ${log.timestamp} - ${log.ip}`;
+
+        const gmt7 = new Date(log.timestamp);
+        gmt7.setHours(gmt7.getHours() + 7);
+        
+        const localTime = gmt7.toISOString().replace("T", " ").slice(0, 19);
+        const summaryText = `${logNumber}. ${localTime} - ${log.ip}`;
         summary.textContent = summaryText;
         details.appendChild(summary);
 
