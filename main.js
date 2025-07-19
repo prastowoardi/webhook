@@ -5,6 +5,8 @@ function loadLogs() {
       const container = document.getElementById("log-container");
       container.innerHTML = "";
 
+      data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
       data.forEach((log, i) => {
         const details = document.createElement("details");
         const summary = document.createElement("summary");

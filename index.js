@@ -1,5 +1,5 @@
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const { method } = request;
     const { pathname } = new URL(request.url);
 
@@ -18,20 +18,29 @@ export default {
 
     if (method === 'POST' && pathname === '/webhook') {
       const body = await request.json();
-      const ip =
-        request.headers.get("CF-Connecting-IP") ||
-        request.headers.get("X-Forwarded-For") ||
-        request.headers.get("X-Real-IP") ||
-        "unknown";
 
       const log = {
         timestamp: new Date().toISOString(),
-        ip,
+        ip: request.headers.get("CF-Connecting-IP") || "unknown",
         body,
       };
 
-      const key = `log-${Date.now()}`;
-      await env.LOGS.put(key, JSON.stringify(log));
+      const oldLogsText = await env.LOGS.get("webhook_logs");
+      let oldLogs = [];
+
+      if (oldLogsText) {
+        try {
+          oldLogs = JSON.parse(oldLogsText);
+        } catch (e) {
+          oldLogs = [];
+        }
+      }
+
+      oldLogs.unshift(log);
+
+      if (oldLogs.length > 100) oldLogs = oldLogs.slice(0, 100);
+
+      await env.LOGS.put("webhook_logs", JSON.stringify(oldLogs));
 
       return new Response("OK", {
         status: 200,
@@ -40,16 +49,8 @@ export default {
     }
 
     if (method === 'GET' && pathname === '/logs') {
-      const list = await env.LOGS.list({ prefix: "log-" });
-      const keys = list.keys.sort((a, b) => b.name.localeCompare(a.name)); // descending
-
-      const logs = [];
-      for (const key of keys.slice(0, 100)) {
-        const value = await env.LOGS.get(key.name);
-        if (value) logs.push(JSON.parse(value));
-      }
-
-      return new Response(JSON.stringify(logs), {
+      const logsText = await env.LOGS.get("webhook_logs");
+      return new Response(logsText || "[]", {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
@@ -59,12 +60,12 @@ export default {
     }
 
     if (method === 'GET' && pathname === '/') {
-      return Response.redirect("https://prastowoardi.github.io", 302);
+      return Response.redirect('https://prastowoardi.github.io', 302);
     }
 
-    return new Response("Not Found", {
+    return new Response('Not Found', {
       status: 404,
       headers: corsHeaders,
     });
-  }
+  },
 };
