@@ -17,28 +17,32 @@ export default {
     }
 
     if (method === 'POST' && pathname === '/webhook') {
-      const body = await request.json();
+      let body;
+      try {
+        body = await request.json();
+      } catch (e) {
+        body = { error: "Invalid JSON" };
+      }
 
       const log = {
         timestamp: new Date().toISOString(),
         ip: request.headers.get("CF-Connecting-IP") || request.headers.get("x-forwarded-for") || "unknown",
-        method: request.method,
+        method: method || "UNKNOWN",
         body,
+        userAgent: request.headers.get("user-agent") || "unknown",
       };
 
-      const oldLogsText = await env.LOGS.get("webhook_logs");
       let oldLogs = [];
-
-      if (oldLogsText) {
-        try {
+      try {
+        const oldLogsText = await env.LOGS.get("webhook_logs");
+        if (oldLogsText) {
           oldLogs = JSON.parse(oldLogsText);
-        } catch (e) {
-          oldLogs = [];
         }
+      } catch (e) {
+        oldLogs = [];
       }
 
       oldLogs.unshift(log);
-
       if (oldLogs.length > 100) oldLogs = oldLogs.slice(0, 100);
 
       await env.LOGS.put("webhook_logs", JSON.stringify(oldLogs));

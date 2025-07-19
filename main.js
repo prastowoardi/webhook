@@ -8,14 +8,15 @@ function loadLogs() {
       Array.from(container.children).forEach(child => {
         const summary = child.querySelector("summary");
         if (child.tagName === "DETAILS" && child.open && summary) {
-          const key = summary.textContent;
-          openMap[key] = true;
+          openMap[summary.textContent] = true;
         }
       });
 
       container.innerHTML = "";
 
       [...data].reverse().forEach((log, i) => {
+        if (!log.method || log.method === "UNKNOWN") return;
+
         const details = document.createElement("details");
         const summary = document.createElement("summary");
 
@@ -23,7 +24,7 @@ function loadLogs() {
         gmt7.setHours(gmt7.getHours() + 7);
         const localTime = gmt7.toISOString().replace("T", " ").slice(0, 19);
 
-        const summaryText = `${log.method || "UNKNOWN"} - ${localTime} - ${log.ip}`;
+        const summaryText = `${log.method} - ${localTime} - ${log.ip}`;
         summary.textContent = summaryText;
         details.appendChild(summary);
 
