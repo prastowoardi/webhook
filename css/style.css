@@ -16,7 +16,7 @@ h1 {
     text-align: center;
 }
 
-#delete-button {
+#delete-all {
     position: absolute;
     top: 20px;
     right: 20px;
@@ -30,7 +30,7 @@ h1 {
     transition: background-color 0.3s ease;
 }
 
-#delete-button:hover {
+#delete-all:hover {
     background-color: #b71c1c;
 }
 
@@ -103,4 +103,55 @@ pre {
 pre a {
     color: #4FC3F7;
     text-decoration: underline;
+}
+
+.modal {
+  display: none; /* default hidden */
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0; width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #2c2c2c;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 320px;
+  text-align: center;
+  color: #eee;
+  font-size: 16px;
+}
+
+.modal-buttons {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.modal-content button {
+  padding: 8px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#confirm-yes {
+  background-color: #d32f2f;
+  color: white;
+}
+
+#confirm-no {
+  background-color: #555;
+  color: white;
+}
+
+#notify-ok {
+  background-color: #4FC3F7;
+  color: white;
+  margin-top: 15px;
+  width: 100%;
 }

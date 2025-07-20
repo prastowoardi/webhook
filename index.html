@@ -6,7 +6,26 @@
     <title>Webhook Logs</title>
   </head>
 <body>
-  <button id="delete-button" onclick="deleteLogs()">🗑️ Delete All</button>
+    <!-- Modal Konfirmasi -->
+    <div id="confirm-modal" class="modal">
+      <div class="modal-content">
+        <p id="confirm-message">Yakin hapus log?</p>
+        <div class="modal-buttons">
+          <button id="confirm-yes">Yes</button>
+          <button id="confirm-no">No</button>
+        </div>
+      </div>
+    </div>
+
+  <!-- Modal Notifikasi -->
+  <div id="notify-modal" class="modal">
+    <div class="modal-content">
+      <p id="notify-message"></p>
+      <button id="notify-ok">OK</button>
+    </div>
+  </div>
+
+  <button id="delete-all">🗑️ Delete All</button>
 
   <h1>Webhook Logs</h1>
 
@@ -15,6 +34,6 @@
   <div id="log-container">Loading...</div>
 
   <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-  <script src="main.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>

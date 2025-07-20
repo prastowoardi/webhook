@@ -1,3 +1,5 @@
+import { deleteSingleLog, deleteLogs } from './helpers/action.js';
+
 function loadLogs() {
   fetch("https://webhook.prastowoardi616.workers.dev/logs")
     .then(res => res.json())
@@ -48,7 +50,10 @@ function loadLogs() {
         deleteBtn.style.color = "#f44336";
         deleteBtn.style.fontSize = "14px";
         deleteBtn.style.float = "right";
-        deleteBtn.onclick = () => deleteSingleLog(data.length - 1 - i);
+        deleteBtn.onclick = (event) => {
+          event.stopPropagation();
+          deleteSingleLog(data.length - 1 - i);
+        };
         summary.appendChild(deleteBtn);
       
         details.appendChild(summary);
@@ -105,49 +110,7 @@ function copyButton(textToCopy) {
   return button;
 }
 
-function deleteSingleLog(index) {
-  if (!confirm("Yakin Hapus Log?")) return;
-
-  fetch("https://webhook.prastowoardi616.workers.dev/delete", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ index })
-  })
-    .then(res => {
-      if (res.ok) {
-        alert("Log berhasil dihapus.");
-        loadLogs();
-      } else {
-        alert("Gagal menghapus log.");
-      }
-    })
-    .catch(err => {
-      alert("Terjadi kesalahan saat menghapus.");
-      console.error(err);
-    });
-}
-
-function deleteLogs() {
-  if (!confirm("Yakin ingin menghapus semua log?")) return;
-
-  fetch("https://webhook.prastowoardi616.workers.dev/logs", {
-    method: "DELETE"
-  })
-  .then(res => {
-    if (res.ok) {
-      alert("Semua log berhasil dihapus.");
-      loadLogs();
-    } else {
-      alert("Gagal menghapus log.");
-    }
-  })
-  .catch(err => {
-    alert("Terjadi kesalahan saat menghapus log.");
-    console.error(err);
-  });
-}
+document.getElementById("delete-all").addEventListener("click", deleteLogs);
 
 function updateCurrentTime() {
   const now = moment().utcOffset(7);
@@ -159,3 +122,7 @@ updateCurrentTime();
 setInterval(updateCurrentTime, 1000);
 loadLogs();
 setInterval(loadLogs, 5000);
+
+export {
+  loadLogs,
+}
