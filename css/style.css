@@ -34,26 +34,27 @@ h1 {
     background-color: #b71c1c;
 }
 
-#log-count {
+#log-count, 
+#log-container {
     width: 100%;
-    max-width: 800px;
-    padding: 10px;
-    font-size: 14px;
-    color: #ccc;
-    text-align: left;
+    max-width: 900px;
+    padding-left: 15px;
+    padding-right: 15px;
     box-sizing: border-box;
+    margin: 0 auto; /* supaya center */
 }
 
 #log-count {
+    font-size: 14px;
     color: #aaa;
-    margin-bottom: 10px;
+    text-align: left;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 #log-container {
-    width: 100%;
-    max-width: 800px;
-    padding: 10px;
-    box-sizing: border-box;
+    padding-top: 15px;
+    padding-bottom: 15px;
 }
 
 details {

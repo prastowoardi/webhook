@@ -5,7 +5,7 @@ export default {
 
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS ',
+      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     };
 
@@ -30,7 +30,12 @@ export default {
         method: method || "UNKNOWN",
         body,
         userAgent: request.headers.get("user-agent") || "unknown",
+        headers: {},
       };
+      
+      for (const [key, value] of request.headers.entries()) {
+        log.headers[key] = value;
+      }
 
       let oldLogs = [];
       try {
