@@ -9,14 +9,14 @@ body {
       align-items: center;
       min-height: 100vh;
       position: relative;
-    }
+}
 
-    h1 {
+h1 {
       margin-bottom: 20px;
       text-align: center;
-    }
+}
 
-    #delete-button {
+#delete-button {
       position: absolute;
       top: 20px;
       right: 20px;
@@ -28,13 +28,13 @@ body {
       cursor: pointer;
       font-size: 14px;
       transition: background-color 0.3s ease;
-    }
+}
 
-    #delete-button:hover {
+#delete-button:hover {
       background-color: #b71c1c;
-    }
+}
 
-    #log-count {
+#log-count {
       width: 100%;
       max-width: 800px;
       padding: 10px;
@@ -42,30 +42,30 @@ body {
       color: #ccc;
       text-align: left;
       box-sizing: border-box;
-    }
+}
 
-    #log-count {
+#log-count {
       color: #aaa;
       margin-bottom: 10px;
-    }
+}
 
-    #log-container {
+#log-container {
       width: 100%;
       max-width: 800px;
       padding: 10px;
       box-sizing: border-box;
-    }
+}
 
-    details {
+details {
       background-color: #2c2c2c;
       border: 1px solid #444;
       border-radius: 6px;
       padding: 10px;
       font-size: 14px;
       margin-bottom: 10px;
-    }
+}
 
-    summary {
+summary {
       font-weight: bold;
       color: #c4f1f9;
       cursor: pointer;
@@ -73,22 +73,22 @@ body {
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
+}
 
-    summary::-webkit-details-marker {
+summary::-webkit-details-marker {
       display: none;
-    }
+}
 
-    summary button {
+summary button {
       background: none;
       border: none;
       color: #f44336;
       font-size: 14px;
       cursor: pointer;
       margin-left: 10px;
-    }
+}
 
-    pre {
+pre {
       background-color: #1a1a1a;
       color: #dcdcdc;
       padding: 10px;
@@ -98,9 +98,9 @@ body {
       overflow-x: auto;
       margin-top: 10px;
       font-family: monospace;
-    }
+}
 
-    pre a {
+pre a {
       color: #4FC3F7;
       text-decoration: underline;
-    }
+}
