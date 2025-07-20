@@ -3,11 +3,14 @@ function loadLogs() {
     .then(res => res.json())
     .then(data => {
       const container = document.getElementById("log-container");
+      const countDisplay = document.getElementById("log-count");
 
       if (!data || data.length === 0) {
+        countDisplay.textContent = "Total Logs: 0";
         container.innerHTML = "<p style='text-align:center; color:#888;'>No log data!</p>";
         return;
       }
+      countDisplay.innerHTML = `Total Data: <strong>${data.length}</strong>`;
 
       const openMap = {};
       Array.from(container.children).forEach(child => {
@@ -28,7 +31,7 @@ function loadLogs() {
       
         const gmt7 = new Date(log.timestamp);
         gmt7.setHours(gmt7.getHours() + 7);
-        const localTime = gmt7.toISOString().replace("T", " ").slice(0, 19);
+        const localTime = moment(log.timestamp).utcOffset(7).format("DD-MM-YYYY - HH:mm:ss");
       
         const summaryText = `${log.method} - ${localTime} - ${log.ip}`;
         const uniqueKey = `${log.timestamp}_${log.ip}_${log.method}`;
@@ -135,7 +138,7 @@ function deleteLogs() {
   .then(res => {
     if (res.ok) {
       alert("Semua log berhasil dihapus.");
-      loadLogs();  // refresh tampilan setelah hapus
+      loadLogs();
     } else {
       alert("Gagal menghapus log.");
     }
@@ -146,5 +149,13 @@ function deleteLogs() {
   });
 }
 
+function updateCurrentTime() {
+  const now = moment().utcOffset(7);
+  const formatted = now.format("DD-MM-YYYY - HH:mm:ss");
+  document.getElementById("current-time").textContent = `Current Time: ${formatted}`;
+}
+
+updateCurrentTime();
+setInterval(updateCurrentTime, 1000);
 loadLogs();
 setInterval(loadLogs, 5000);
