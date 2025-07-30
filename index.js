@@ -73,6 +73,13 @@ export default {
       return Response.redirect('https://prastowoardi.github.io', 302);
     }
 
+    if (method === 'GET' && pathname === '/webhook') {
+      return new Response('Webhook endpoint - GET is not allowed', {
+        status: 405,
+        headers: corsHeaders,
+      });
+    }
+
     if (method === 'DELETE' && pathname.startsWith('/logs/')) {
       const indexStr = pathname.split('/')[2];
       const index = parseInt(indexStr, 10);
