@@ -156,3 +156,23 @@ pre a {
   margin-top: 15px;
   width: 100%;
 }
+
+.copy-webhook-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.copy-webhook-container button {
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: none;
+  background-color: #444;
+  color: white;
+  font-size: 14px;
+}
+.copy-webhook-container .url-text {
+  font-family: monospace;
+  color: #222;
+  word-break: break-all;
+}

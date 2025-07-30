@@ -129,8 +129,14 @@ function loadLogs() {
 }
 
 function copyButton(textToCopy) {
+  const clipboardIcon = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+  </svg>`;
+
   const button = document.createElement("button");
-  button.textContent = "📋 Copy";
+  button.innerHTML = `${clipboardIcon}`;
   button.style.margin = "10px 0";
   button.style.cursor = "pointer";
   button.style.backgroundColor = "#444";
@@ -139,15 +145,20 @@ function copyButton(textToCopy) {
   button.style.padding = "5px 10px";
   button.style.borderRadius = "4px";
   button.style.fontSize = "12px";
+  button.style.display = "flex";
+  button.style.alignItems = "center";
+  button.style.gap = "5px";
 
   button.addEventListener("click", () => {
     navigator.clipboard.writeText(textToCopy)
       .then(() => {
-        button.textContent = "✅ Copied!";
-        setTimeout(() => (button.textContent = "📋 Copy"), 1500);
+        button.textContent = "Copied!";
+        setTimeout(() => {
+          button.innerHTML = `${clipboardIcon}`;
+        }, 1500);
       })
       .catch(() => {
-        button.textContent = "❌ Failed";
+        button.textContent = "Failed";
       });
   });
 
@@ -162,6 +173,35 @@ function updateCurrentTime() {
   document.getElementById("current-time").textContent = `Current Time: ${formatted}`;
 }
 
+function renderWebhookUrl() {
+  const baseURL = `${window.location.origin}`;
+  const WEBHOOK_URL = `${baseURL}/webhook`;
+
+  const webhookContainer = document.getElementById("webhook-url");
+  webhookContainer.innerHTML = "";
+
+  const flexContainer = document.createElement("div");
+  flexContainer.style.display = "flex";
+  flexContainer.style.alignItems = "center";
+  flexContainer.style.gap = "10px";
+
+  const code = document.createElement("code");
+  code.textContent = WEBHOOK_URL;
+  code.style.fontFamily = "monospace";
+  code.style.backgroundColor = "#eee";
+  code.style.padding = "4px 8px";
+  code.style.borderRadius = "4px";
+  code.style.userSelect = "all";
+
+  const button = copyButton(WEBHOOK_URL);
+
+  flexContainer.appendChild(code);
+  flexContainer.appendChild(button);
+
+  webhookContainer.appendChild(flexContainer);
+}
+
+renderWebhookUrl();
 updateCurrentTime();
 setInterval(updateCurrentTime, 1000);
 loadLogs();
