@@ -1,7 +1,8 @@
 import { deleteSingleLog, deleteLogs } from './helpers/action.js';
+const baseURL = "https://webhook.prastowoardi616.workers.dev";
 
 function loadLogs() {
-  fetch("https://webhook.prastowoardi616.workers.dev/logs")
+  fetch(`${baseURL}/logs`)
     .then(res => res.json())
     .then(data => {
       const container = document.getElementById("log-container");
@@ -174,7 +175,6 @@ function updateCurrentTime() {
 }
 
 function renderWebhookUrl() {
-  const baseURL = `${window.location.origin}`;
   const WEBHOOK_URL = `${baseURL}/webhook`;
 
   const webhookContainer = document.getElementById("webhook-url");
