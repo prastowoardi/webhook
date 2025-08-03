@@ -1,6 +1,6 @@
 import { deleteSingleLog, deleteLogs } from './helpers/action.js';
 const baseURL = "https://webhook.prastowoardi616.workers.dev";
-const pageSize = 100;
+const pageSize = 50;
 let fullLogData = [];
 
 const savedPage = parseInt(localStorage.getItem("currentPage"));
