@@ -42,6 +42,9 @@ async function deleteSingleLog(index) {
   })
   .then(res => {
     if (res.ok) {
+      if (uniqueKey) {
+        localStorage.removeItem(`log-open-${uniqueKey}`);
+      }
       showNotify("Success delete log.");
       loadLogs();
     } else {

@@ -42,17 +42,33 @@ export default {
 
     async function getAllLogs() {
       let allLogs = [];
-      let pageIndex = 0;
 
+      const baseLogs = await env.LOGS.get("webhook_logs");
+      if (baseLogs) {
+        try {
+          const logs = JSON.parse(baseLogs);
+          if (Array.isArray(logs)) {
+            allLogs = allLogs.concat(logs);
+          }
+        } catch (err) {
+          console.error("Error parsing webhook_logs:", err);
+        }
+      }
+
+      let pageIndex = 0;
       while (true) {
         const key = `webhook_logs_${pageIndex}`;
         const data = await env.LOGS.get(key);
         if (!data) break;
 
-        const logs = JSON.parse(data);
-        if (logs.length === 0) break;
+        try {
+          const logs = JSON.parse(data);
+          if (logs.length === 0) break;
+          allLogs = allLogs.concat(logs);
+        } catch (err) {
+          console.error(`Error parsing ${key}:`, err);
+        }
 
-        allLogs = allLogs.concat(logs);
         pageIndex++;
       }
 
