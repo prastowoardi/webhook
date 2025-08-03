@@ -115,6 +115,58 @@ export default {
       });
     }
 
+    if (method === 'DELETE' && pathname.startsWith('/logs/')) {
+      try {
+        const indexStr = pathname.split('/')[2];
+        const globalIndex = parseInt(indexStr, 10);
+
+        if (isNaN(globalIndex)) {
+          return new Response("Invalid index", { status: 400, headers: corsHeaders });
+        }
+
+        let allLogs = [];
+        let pageIndex = 0;
+
+        while (true) {
+          const key = `webhook_logs_${pageIndex}`;
+          const data = await env.LOGS.get(key);
+          if (!data) break;
+
+          const logs = JSON.parse(data);
+          if (logs.length === 0) break;
+
+          allLogs = allLogs.concat(logs);
+          pageIndex++;
+        }
+
+        if (globalIndex < 0 || globalIndex >= allLogs.length) {
+          return new Response("Index out of range", { status: 404, headers: corsHeaders });
+        }
+
+        allLogs.splice(globalIndex, 1);
+
+        pageIndex = 0;
+        while (allLogs.length > 0) {
+          const key = `webhook_logs_${pageIndex}`;
+          const chunk = allLogs.splice(0, MAX_LOGS_PER_PAGE);
+          await env.LOGS.put(key, JSON.stringify(chunk));
+          pageIndex++;
+        }
+
+        while (true) {
+          const key = `webhook_logs_${pageIndex}`;
+          const data = await env.LOGS.get(key);
+          if (!data) break;
+          await env.LOGS.delete(key);
+          pageIndex++;
+        }
+
+        return new Response("Log deleted", { status: 200, headers: corsHeaders });
+      } catch (err) {
+        return new Response(`Error: ${err.message}`, { status: 500, headers: corsHeaders });
+      }
+    }
+
     if (method === 'GET' && pathname === '/') {
       return Response.redirect('https://prastowoardi.github.io', 302);
     }

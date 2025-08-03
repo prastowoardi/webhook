@@ -37,19 +37,15 @@ async function deleteSingleLog(index) {
   const confirmed = await showConfirm("Are you sure want to delete log?");
   if (!confirmed) return;
 
-  fetch("https://webhook.prastowoardi616.workers.dev/delete", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ index })
+  fetch(`https://webhook.prastowoardi616.workers.dev/logs/${index}`, {
+    method: "DELETE",
   })
   .then(res => {
     if (res.ok) {
       showNotify("Success delete log.");
       loadLogs();
     } else {
-      showNotify("Failed to delete log.");
+      res.text().then(text => showNotify(`Failed to delete log: ${text}`));
     }
   })
   .catch(err => {
