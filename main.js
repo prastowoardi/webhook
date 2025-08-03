@@ -1,10 +1,15 @@
 import { deleteSingleLog, deleteLogs } from './helpers/action.js';
 const baseURL = "https://webhook.prastowoardi616.workers.dev";
+let currentPage = 1;
+const pageSize = 100;
+let fullLogData = [];
 
 function loadLogs() {
   fetch(`${baseURL}/logs`)
     .then(res => res.json())
     .then(data => {
+      fullLogData = [...data].reverse();
+      renderPage(currentPage);
       const container = document.getElementById("log-container");
       const countDisplay = document.getElementById("log-count");
 
@@ -201,11 +206,138 @@ function renderWebhookUrl() {
   webhookContainer.appendChild(flexContainer);
 }
 
+function renderPage(page) {
+  const container = document.getElementById("log-container");
+  const countDisplay = document.getElementById("log-count");
+  const pageInfo = document.getElementById("page-info");
+
+  if (!fullLogData || fullLogData.length === 0) {
+    countDisplay.textContent = "Total Logs: 0";
+    container.innerHTML = "<p style='text-align:center; color:#888;'>No log data!</p>";
+    return;
+  }
+
+  const totalPages = Math.ceil(fullLogData.length / pageSize);
+  currentPage = Math.max(1, Math.min(page, totalPages));
+
+  const start = (currentPage - 1) * pageSize;
+  const end = start + pageSize;
+  const logs = fullLogData.slice(start, end);
+
+  container.innerHTML = "";
+  countDisplay.innerHTML = `Total Logs: <strong>${fullLogData.length}</strong>`;
+  pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+
+  logs.forEach((log, i) => {
+    if (!log.method || log.method === "UNKNOWN") return;
+
+    const details = document.createElement("details");
+    const summary = document.createElement("summary");
+
+    const localTime = moment(log.timestamp).utcOffset(7).format("DD-MM-YYYY - HH:mm:ss");
+    const summaryText = `${log.method} - ${localTime} - ${log.ip}`;
+    const uniqueKey = `${log.timestamp}_${log.ip}_${log.method}`;
+
+    summary.textContent = summaryText;
+    summary.setAttribute("data-key", uniqueKey);
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "🗑️";
+    deleteBtn.style.marginLeft = "10px";
+    deleteBtn.style.cursor = "pointer";
+    deleteBtn.style.background = "none";
+    deleteBtn.style.border = "none";
+    deleteBtn.style.color = "#f44336";
+    deleteBtn.style.fontSize = "14px";
+    deleteBtn.style.float = "right";
+    const globalIndex = start + i;
+    deleteBtn.onclick = (event) => {
+      event.stopPropagation();
+      deleteSingleLog(globalIndex);
+    };
+    summary.appendChild(deleteBtn);
+
+    details.appendChild(summary);
+
+    const containerFlex = document.createElement("div");
+    containerFlex.style.display = "flex";
+    containerFlex.style.gap = "20px";
+    containerFlex.style.justifyContent = "space-between";
+    containerFlex.style.alignItems = "flex-start";
+
+    const headersBox = document.createElement("div");
+    headersBox.style.flex = "1";
+    headersBox.style.background = "#eee";
+    headersBox.style.padding = "8px";
+    headersBox.style.borderRadius = "4px";
+    headersBox.style.overflowX = "auto";
+
+    const headersTitle = document.createElement("h4");
+    headersTitle.textContent = "Headers:";
+    headersBox.appendChild(headersTitle);
+
+    const headersPre = document.createElement("pre");
+    headersPre.textContent = JSON.stringify(log.headers, null, 2);
+    headersBox.appendChild(headersPre);
+
+    const bodyBox = document.createElement("div");
+    bodyBox.style.flex = "1";
+    bodyBox.style.background = "#f9f9f9";
+    bodyBox.style.padding = "8px";
+    bodyBox.style.borderRadius = "4px";
+    bodyBox.style.overflowX = "auto";
+
+    const bodyHeader = document.createElement("div");
+    bodyHeader.style.display = "flex";
+    bodyHeader.style.justifyContent = "space-between";
+    bodyHeader.style.alignItems = "center";
+    bodyHeader.style.marginBottom = "8px";
+
+    const bodyTitle = document.createElement("h4");
+    bodyTitle.textContent = "Body:";
+    bodyTitle.style.margin = "0";
+
+    const jsonText = JSON.stringify(log.body, null, 2);
+    const copyBtn = copyButton(jsonText);
+
+    bodyHeader.appendChild(bodyTitle);
+    bodyHeader.appendChild(copyBtn);
+    bodyBox.appendChild(bodyHeader);
+
+    const linkedText = jsonText.replace(
+      /(https?:\/\/[^\s"]+)/g,
+      '<a href="$1" target="_blank" style="color:#4FC3F7;">$1</a>'
+    );
+
+    const bodyPre = document.createElement("pre");
+    bodyPre.innerHTML = linkedText;
+    bodyBox.appendChild(bodyPre);
+
+    containerFlex.appendChild(headersBox);
+    containerFlex.appendChild(bodyBox);
+    details.appendChild(containerFlex);
+    container.appendChild(details);
+  });
+
+  // Update tombol prev/next
+  document.getElementById("prev-page").disabled = currentPage === 1;
+  document.getElementById("next-page").disabled = currentPage === totalPages;
+}
+
 renderWebhookUrl();
 updateCurrentTime();
 setInterval(updateCurrentTime, 1000);
 loadLogs();
 setInterval(loadLogs, 5000);
+
+document.getElementById("prev-page").addEventListener("click", () => {
+  if (currentPage > 1) renderPage(currentPage - 1);
+});
+
+document.getElementById("next-page").addEventListener("click", () => {
+  const totalPages = Math.ceil(fullLogData.length / pageSize);
+  if (currentPage < totalPages) renderPage(currentPage + 1);
+});
 
 export {
   loadLogs,
