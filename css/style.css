@@ -41,14 +41,14 @@ h1 {
     padding-left: 15px;
     padding-right: 15px;
     box-sizing: border-box;
-    margin: 0 auto; /* supaya center */
+    margin: 0 auto;
 }
 
 #log-count {
     font-size: 14px;
     color: #aaa;
     text-align: left;
-    padding-top: 10px;
+    padding-top: 20px;
     padding-bottom: 10px;
 }
 
@@ -176,3 +176,22 @@ pre a {
   color: #222;
   word-break: break-all;
 }
+
+#log-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 870px;
+  margin: 0 auto 20px auto;
+  /* padding: 0 10px; */
+}
+
+#pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+

@@ -33,14 +33,15 @@
     <div class="copy-webhook-container"> </div>
   </div>
   <div id="current-time">Loading current time...</div>
-  <div id="log-count">Loading count...</div>  
-  <div id="log-container">Loading...</div>
-  <div id="pagination" style="margin-top: 20px; text-align: center;">
-    <button id="prev-page">◀</button>
-    <span id="page-info">Page 1</span>
-    <button id="next-page">▶</button>
+  <div id="log-controls">
+    <div id="log-count" style="padding-left: 0px;">Loading Count</div>
+    <div id="pagination" style="padding-right: 0px;">
+      <button id="prev-page">◀</button>
+      <span id="page-info">Page 1 of 3</span>
+      <button id="next-page">▶</button>
+    </div>
   </div>
-
+  <div id="log-container" style="padding-top: 0px;">Loading...</div>
   <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
   <script type="module" src="main.js"></script>
 </body>
