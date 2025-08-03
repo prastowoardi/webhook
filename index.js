@@ -16,6 +16,49 @@ export default {
       });
     }
 
+    const MAX_LOGS_PER_PAGE = 100;
+
+    async function saveLog(log) {
+      let pageIndex = 0;
+
+      while (true) {
+        const key = `webhook_logs_${pageIndex}`;
+        let logs = [];
+
+        const existing = await env.LOGS.get(key);
+        if (existing) {
+          logs = JSON.parse(existing);
+        }
+
+        if (logs.length < MAX_LOGS_PER_PAGE) {
+          logs.unshift(log);
+          await env.LOGS.put(key, JSON.stringify(logs));
+          break;
+        }
+
+        pageIndex++;
+      }
+    }
+
+    async function getAllLogs() {
+      let allLogs = [];
+      let pageIndex = 0;
+
+      while (true) {
+        const key = `webhook_logs_${pageIndex}`;
+        const data = await env.LOGS.get(key);
+        if (!data) break;
+
+        const logs = JSON.parse(data);
+        if (logs.length === 0) break;
+
+        allLogs = allLogs.concat(logs);
+        pageIndex++;
+      }
+
+      return allLogs;
+    }
+
     if (method === 'POST' && pathname === '/webhook') {
       let body;
       try {
@@ -32,25 +75,12 @@ export default {
         userAgent: request.headers.get("user-agent") || "unknown",
         headers: {},
       };
-      
+
       for (const [key, value] of request.headers.entries()) {
         log.headers[key] = value;
       }
 
-      let oldLogs = [];
-      try {
-        const oldLogsText = await env.LOGS.get("webhook_logs");
-        if (oldLogsText) {
-          oldLogs = JSON.parse(oldLogsText);
-        }
-      } catch (e) {
-        oldLogs = [];
-      }
-
-      oldLogs.unshift(log);
-      if (oldLogs.length > 100) oldLogs = oldLogs.slice(0, 100);
-
-      await env.LOGS.put("webhook_logs", JSON.stringify(oldLogs));
+      await saveLog(log);
 
       return new Response("OK", {
         status: 200,
@@ -59,13 +89,29 @@ export default {
     }
 
     if (method === 'GET' && pathname === '/logs') {
-      const logsText = await env.LOGS.get("webhook_logs");
-      return new Response(logsText || "[]", {
+      const logs = await getAllLogs();
+      return new Response(JSON.stringify(logs), {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
           ...corsHeaders,
         },
+      });
+    }
+
+    if (method === 'DELETE' && pathname === '/logs') {
+      let pageIndex = 0;
+      while (true) {
+        const key = `webhook_logs_${pageIndex}`;
+        const data = await env.LOGS.get(key);
+        if (!data) break;
+        await env.LOGS.delete(key);
+        pageIndex++;
+      }
+
+      return new Response("All logs deleted", {
+        status: 200,
+        headers: corsHeaders,
       });
     }
 
@@ -76,82 +122,6 @@ export default {
     if (method === 'GET' && pathname === '/webhook') {
       return new Response('Webhook endpoint - GET is not allowed', {
         status: 405,
-        headers: corsHeaders,
-      });
-    }
-
-    if (method === 'DELETE' && pathname.startsWith('/logs/')) {
-      const indexStr = pathname.split('/')[2];
-      const index = parseInt(indexStr, 10);
-
-      if (isNaN(index)) {
-        return new Response("Invalid index", { status: 400 });
-      }
-
-      const logsText = await env.LOGS.get("webhook_logs");
-      if (!logsText) {
-        return new Response("No logs", { status: 404 });
-      }
-
-      let logs = [];
-      try {
-        logs = JSON.parse(logsText);
-      } catch {
-        return new Response("Corrupt log data", { status: 500 });
-      }
-
-      if (index < 0 || index >= logs.length) {
-        return new Response("Index out of range", { status: 404 });
-      }
-
-      logs.splice(index, 1);
-
-      await env.LOGS.put("webhook_logs", JSON.stringify(logs));
-
-      return new Response("Log deleted", {
-        status: 200,
-        headers: corsHeaders,
-      });
-    }
-
-    if (method === 'DELETE' && pathname === '/logs') {
-      await env.LOGS.put("webhook_logs", JSON.stringify([]));
-      return new Response("All logs deleted", {
-        status: 200,
-        headers: corsHeaders,
-      });
-    }
-
-    if (method === 'POST' && pathname === '/delete') {
-      let { index } = await request.json();
-      index = parseInt(index, 10);
-
-      if (isNaN(index)) {
-        return new Response("Invalid index", { status: 400, headers: corsHeaders });
-      }
-
-      const logsText = await env.LOGS.get("webhook_logs");
-      if (!logsText) {
-        return new Response("No logs", { status: 404, headers: corsHeaders });
-      }
-
-      let logs = [];
-      try {
-        logs = JSON.parse(logsText);
-      } catch {
-        return new Response("Corrupt log data", { status: 500, headers: corsHeaders });
-      }
-
-      if (index < 0 || index >= logs.length) {
-        return new Response("Index out of range", { status: 404, headers: corsHeaders });
-      }
-
-      logs.splice(index, 1);
-
-      await env.LOGS.put("webhook_logs", JSON.stringify(logs));
-
-      return new Response("Log deleted", {
-        status: 200,
         headers: corsHeaders,
       });
     }
