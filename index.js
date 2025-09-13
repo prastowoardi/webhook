@@ -4,58 +4,48 @@ export default {
     const { pathname } = new URL(request.url);
 
     const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "*",
     };
 
-    if (method === 'OPTIONS') {
-      return new Response(null, {
-        status: 204,
-        headers: corsHeaders,
+    function withCors(body, status = 200, extraHeaders = {}) {
+      return new Response(body, {
+        status,
+        headers: {
+          ...corsHeaders,
+          ...extraHeaders,
+        },
       });
+    }
+
+    if (method === "OPTIONS") {
+      return withCors(null, 204);
     }
 
     const MAX_LOGS_PER_PAGE = 100;
 
     async function saveLog(log) {
       let pageIndex = 0;
-
       while (true) {
         const key = `webhook_logs_${pageIndex}`;
         let logs = [];
-
         const existing = await env.LOGS.get(key);
-        if (existing) {
-          logs = JSON.parse(existing);
-        }
+        if (existing) logs = JSON.parse(existing);
 
         if (logs.length < MAX_LOGS_PER_PAGE) {
           logs.unshift(log);
           await env.LOGS.put(key, JSON.stringify(logs));
           break;
         }
-
         pageIndex++;
       }
     }
 
     async function getAllLogs() {
       let allLogs = [];
-
-      const baseLogs = await env.LOGS.get("webhook_logs");
-      if (baseLogs) {
-        try {
-          const logs = JSON.parse(baseLogs);
-          if (Array.isArray(logs)) {
-            allLogs = allLogs.concat(logs);
-          }
-        } catch (err) {
-          console.error("Error parsing webhook_logs:", err);
-        }
-      }
-
       let pageIndex = 0;
+
       while (true) {
         const key = `webhook_logs_${pageIndex}`;
         const data = await env.LOGS.get(key);
@@ -68,54 +58,38 @@ export default {
         } catch (err) {
           console.error(`Error parsing ${key}:`, err);
         }
-
         pageIndex++;
       }
-
       return allLogs;
     }
 
-    if (method === 'POST' && pathname === '/webhook') {
+    if (method === "POST" && pathname === "/webhook") {
       let body;
       try {
         body = await request.json();
-      } catch (e) {
+      } catch {
         body = { error: "Invalid JSON" };
       }
 
       const log = {
         timestamp: new Date().toISOString(),
         ip: request.headers.get("CF-Connecting-IP") || request.headers.get("x-forwarded-for") || "unknown",
-        method: method || "UNKNOWN",
+        method,
         body,
         userAgent: request.headers.get("user-agent") || "unknown",
-        headers: {},
+        headers: Object.fromEntries(request.headers.entries()),
       };
 
-      for (const [key, value] of request.headers.entries()) {
-        log.headers[key] = value;
-      }
-
       await saveLog(log);
-
-      return new Response("OK", {
-        status: 200,
-        headers: corsHeaders,
-      });
+      return withCors("OK");
     }
 
-    if (method === 'GET' && pathname === '/logs') {
+    if (method === "GET" && pathname === "/logs") {
       const logs = await getAllLogs();
-      return new Response(JSON.stringify(logs), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
-      });
+      return withCors(JSON.stringify(logs), 200, { "Content-Type": "application/json" });
     }
 
-    if (method === 'DELETE' && pathname === '/logs') {
+    if (method === "DELETE" && pathname === "/logs") {
       let pageIndex = 0;
       while (true) {
         const key = `webhook_logs_${pageIndex}`;
@@ -124,44 +98,23 @@ export default {
         await env.LOGS.delete(key);
         pageIndex++;
       }
-
-      return new Response("All logs deleted", {
-        status: 200,
-        headers: corsHeaders,
-      });
+      return withCors("All logs deleted");
     }
 
-    if (method === 'DELETE' && pathname.startsWith('/logs/')) {
+    if (method === "DELETE" && pathname.startsWith("/logs/")) {
       try {
-        const indexStr = pathname.split('/')[2];
+        const indexStr = pathname.split("/")[2];
         const globalIndex = parseInt(indexStr, 10);
+        if (isNaN(globalIndex)) return withCors("Invalid index", 400);
 
-        if (isNaN(globalIndex)) {
-          return new Response("Invalid index", { status: 400, headers: corsHeaders });
-        }
-
-        let allLogs = [];
-        let pageIndex = 0;
-
-        while (true) {
-          const key = `webhook_logs_${pageIndex}`;
-          const data = await env.LOGS.get(key);
-          if (!data) break;
-
-          const logs = JSON.parse(data);
-          if (logs.length === 0) break;
-
-          allLogs = allLogs.concat(logs);
-          pageIndex++;
-        }
-
+        let allLogs = await getAllLogs();
         if (globalIndex < 0 || globalIndex >= allLogs.length) {
-          return new Response("Index out of range", { status: 404, headers: corsHeaders });
+          return withCors("Index out of range", 404);
         }
 
         allLogs.splice(globalIndex, 1);
 
-        pageIndex = 0;
+        let pageIndex = 0;
         while (allLogs.length > 0) {
           const key = `webhook_logs_${pageIndex}`;
           const chunk = allLogs.splice(0, MAX_LOGS_PER_PAGE);
@@ -177,26 +130,20 @@ export default {
           pageIndex++;
         }
 
-        return new Response("Log deleted", { status: 200, headers: corsHeaders });
+        return withCors("Log deleted");
       } catch (err) {
-        return new Response(`Error: ${err.message}`, { status: 500, headers: corsHeaders });
+        return withCors(`Error: ${err.message}`, 500);
       }
     }
 
-    if (method === 'GET' && pathname === '/') {
-      return Response.redirect('https://prastowoardi.github.io', 302);
+    if (method === "GET" && pathname === "/") {
+      return Response.redirect("https://prastowoardi.github.io", 302);
     }
 
-    if (method === 'GET' && pathname === '/webhook') {
-      return new Response('Webhook endpoint - GET is not allowed', {
-        status: 405,
-        headers: corsHeaders,
-      });
+    if (method === "GET" && pathname === "/webhook") {
+      return withCors("Webhook endpoint - GET is not allowed", 405);
     }
 
-    return new Response('Not Found', {
-      status: 404,
-      headers: corsHeaders,
-    });
+    return withCors("Not Found", 404);
   },
 };
