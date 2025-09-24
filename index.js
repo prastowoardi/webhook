@@ -46,20 +46,21 @@ export default {
       let allLogs = [];
       let pageIndex = 0;
 
-      while (true) {
-        const key = `webhook_logs_${pageIndex}`;
-        const data = await env.LOGS.get(key);
-        if (!data) break;
+      try {
+        while (true) {
+          const key = `webhook_logs_${pageIndex}`;
+          const data = await env.LOGS.get(key);
+          if (!data) break;
 
-        try {
           const logs = JSON.parse(data);
           if (logs.length === 0) break;
           allLogs = allLogs.concat(logs);
-        } catch (err) {
-          console.error(`Error parsing ${key}:`, err);
+          pageIndex++;
         }
-        pageIndex++;
+      } catch (err) {
+        console.error("Error fetching logs:", err);
       }
+
       return allLogs;
     }
 
@@ -85,8 +86,14 @@ export default {
     }
 
     if (method === "GET" && pathname === "/logs") {
+      const url = new URL(request.url);
+      const page = parseInt(url.searchParams.get("page") || "1");
+      const limit = parseInt(url.searchParams.get("limit") || `${MAX_LOGS_PER_PAGE}`);
+      
       const logs = await getAllLogs();
-      return withCors(JSON.stringify(logs), 200, { "Content-Type": "application/json" });
+      const paginatedLogs = logs.slice((page - 1) * limit, page * limit);
+
+      return withCors(JSON.stringify(paginatedLogs), 200, { "Content-Type": "application/json" });
     }
 
     if (method === "DELETE" && pathname === "/logs") {
@@ -119,14 +126,6 @@ export default {
           const key = `webhook_logs_${pageIndex}`;
           const chunk = allLogs.splice(0, MAX_LOGS_PER_PAGE);
           await env.LOGS.put(key, JSON.stringify(chunk));
-          pageIndex++;
-        }
-
-        while (true) {
-          const key = `webhook_logs_${pageIndex}`;
-          const data = await env.LOGS.get(key);
-          if (!data) break;
-          await env.LOGS.delete(key);
           pageIndex++;
         }
 
