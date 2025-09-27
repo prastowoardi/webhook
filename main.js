@@ -38,7 +38,9 @@ function copyButton(textToCopy) {
 
   const button = document.createElement("button");
   button.innerHTML = `${clipboardIcon}`;
+  button.title = "Copy to clipboard";
   button.style.margin = "10px 0";
+  button.style.marginRight = "10px";
   button.style.cursor = "pointer";
   button.style.backgroundColor = "#444";
   button.style.color = "#fff";
@@ -132,10 +134,21 @@ function renderPage(page) {
     if (!log.method || log.method === "UNKNOWN") return;
 
     const details = document.createElement("details");
+    details.style.marginBottom = "12px";
+    details.style.border = "1px solid #ccc";
+    details.style.borderRadius = "6px";
+    details.style.boxShadow = "0 1px 4px rgba(0,0,0,0.1)";
+    details.style.padding = "10px";
+
     const summary = document.createElement("summary");
+    summary.style.cursor = "pointer";
+    summary.style.fontWeight = "600";
+    summary.style.display = "flex";
+    summary.style.justifyContent = "space-between";
+    summary.style.alignItems = "center";
 
     const localTime = moment(log.timestamp).utcOffset(7).format("DD-MM-YYYY - HH:mm:ss");
-    const summaryText = `${log.method} - ${localTime} - ${log.ip}`;
+    const summaryText = `${log.method} - ${localTime} - ${log.ip || "???"}`;
     const uniqueKey = `${log.timestamp}_${log.ip}_${log.method}`;
 
     summary.textContent = summaryText;
@@ -173,6 +186,7 @@ function renderPage(page) {
     containerFlex.style.gap = "20px";
     containerFlex.style.justifyContent = "space-between";
     containerFlex.style.alignItems = "flex-start";
+    containerFlex.style.marginTop = "10px";
 
     const headersBox = document.createElement("div");
     headersBox.style.flex = "1";
@@ -183,6 +197,7 @@ function renderPage(page) {
 
     const headersTitle = document.createElement("h4");
     headersTitle.textContent = "Headers:";
+    headersTitle.style.marginLeft = "10px";
     headersBox.appendChild(headersTitle);
 
     const headersPre = document.createElement("pre");
@@ -204,7 +219,7 @@ function renderPage(page) {
 
     const bodyTitle = document.createElement("h4");
     bodyTitle.textContent = "Body:";
-    bodyTitle.style.margin = "0";
+    bodyTitle.style.marginLeft = "10px";
 
     const jsonText = JSON.stringify(log.body, null, 2);
     const copyBtn = copyButton(jsonText);

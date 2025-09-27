@@ -195,3 +195,34 @@ pre a {
   white-space: nowrap;
 }
 
+#webhook-url code {
+  background-color: #222 !important;
+  color: #fff !important;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+#webhook-url button {
+  background-color: #333 !important;
+  border: 1px solid #555;
+  color: #fff !important;
+}
+#webhook-url button:hover {
+  background-color: #444 !important;
+}
+
+#log-container details div {
+  background-color: #222 !important;
+  color: #ddd !important;
+  border: 1px solid #444;
+  border-radius: 6px;
+}
+
+#next-page {
+  cursor: pointer;
+}
+
+#prev-page {
+  cursor: pointer;
+}
