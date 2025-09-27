@@ -33,7 +33,7 @@ function showNotify(message) {
   };
 }
 
-async function deleteSingleLog(index) {
+async function deleteSingleLog(index, uniqueKey = null) {
   const confirmed = await showConfirm("Are you sure want to delete log?");
   if (!confirmed) return;
 
