@@ -87,8 +87,11 @@ export default {
         };
 
         await saveLog(log);
-        return withCors("OK", 200, {
-          "Content-Type": "text/plain"
+        return withCors(JSON.stringify({
+          message: "OK",
+          status: 200
+        }), 200, {
+          "Content-Type": "application/json"
         });
       }
 
